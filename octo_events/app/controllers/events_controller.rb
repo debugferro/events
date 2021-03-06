@@ -6,11 +6,11 @@ class EventsController < ApplicationController
   end
 
   def show
-    issue = find_issue(params[:issue_number])
-    if issue
+    issue_number = params[:issue_number]
+    if find_issue(issue_number) && is_numeric?(issue_number)
       render json: {
         status: 200,
-        events: issue.events.as_json(except: [:id, :issue_id])
+        events: @found_issue.events.as_json(except: [:id, :issue_id])
       }
     else
       render json: {
@@ -27,7 +27,7 @@ class EventsController < ApplicationController
   end
 
   def find_issue(issue_number)
-    Issue.where(number: issue_number).first
+    @found_issue = Issue.where(number: issue_number).first
   end
 
   def create_issue(issue_number)
