@@ -14,21 +14,22 @@ class EventsController < ApplicationController
       }
     else
       render json: {
-        status: 401,
-        error: ['No issue with such number']
-      }
+        status: 400,
+        error: ['The issue number is valid (must be a number) or non existant.']
+      }, status: :bad_request
     end
   end
 
   private
 
+  def find_issue(issue_number)
+    @found_issue = Issue.where(number: issue_number).first
+  end
+
   def is_numeric?(string)
     true if Float(string) rescue false
   end
 
-  def find_issue(issue_number)
-    @found_issue = Issue.where(number: issue_number).first
-  end
 
   def create_issue(issue_number)
     @issue = Issue.create(number: issue_number)
