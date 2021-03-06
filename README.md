@@ -4,55 +4,50 @@ Octo Events is an application that listens to Github Events via webhooks and exp
 
 ![alt text](imgs/octo_events.png)
 
- The test consists in building 2 endpoints:
 
-## 1. Webhook Endpoint
+## 1. How to run the project?
 
-The Webhook endpoint receives events from Github and saves them on the database, in order to do that you must read the following docs:
+Follow the steps bellow to run the project:
 
-* Webhooks Overview: https://developer.github.com/webhooks/ 
-* Creating Webhooks : https://developer.github.com/webhooks/creating/
+1. Run the following commands:
+```
+  bundle install
+  rails db:create
+  rails db:migrate
+```
+2. Run rails server, and you'll see something like this:
+```
+  ---------------------NGROK-----------------------------
+  STATUS: running
+  PORT: 3000
+  HTTP: http://yoururl.ngrok.io
+  HTTPS: https://yoururl.ngrok.io
+  ---------------------NGROK-----------------------------
+```
+3. Go to your repository/organization page in GitHub
+4. In settings > WebHooks, create a new webhook
+5. Insert the HTTP or HTTPS URL that rails server alerted you, plus '/events', example: http://myurl.ngrok.io/events/
+6. Define the Content-Type to application/json
+5. Select the type of events you wanna recieve, but since we are working only with issues, click on 'Let me select individual events' and finally 'Issues & Issue comments'.
+6. Mark the active checkbox and add the WebHook
 
-It must be called `/events`
-
-## 2. Events Endpoint
-
-The Events endpoint will expose the persist the events by an api that will filter by issue number
-
-**Request:**
-
-> GET /issues/1000/events
-
-**Response:**
-
-> 200 OK
-```javascript
-[ 
-  { "action": "open", created_at: "...",}, 
-  { "action": "closed", created_at: "...",} 
-]
+NGROK was used to run this application on development enveiroment, and it considers that your ngrok is run by typing 'ngrok'. If it doesn't run you need to open the rails main folder, go to config > puma.rb, and on the options variable on the end of the file, add the path to run your ngrok:
+```
+ options = {
+      addr: ENV.fetch("PORT") { 3000 },
+      config: '~/.ngrok' # The path goes here
+    }
 ```
 
-**Github Integration Instructions**
+For more information, acess the negrok-tunnel gem page on github: https://github.com/bogdanovich/ngrok-tunnel
 
-* Tip: You can use ngrok (https://ngrok.com/)  to install / debug the webhook calls, it generates a public url that will route to your local host:
+## 2. Executing tests
 
-   $ sudo ngrok http 4000 
+I used the RSpec gem to construct the tests. To run all of them, just run on the terminal:
 
-![alt text](imgs/ngrok.png)
+> rspec
 
-   GitHub
+## 2. Routes
 
-![alt text](imgs/add_webhook.png)
- 
-**Final Observations**
-
-* Use any library / framework / gem  you want, you don't have to do anything "from scratch"
-* Write tests, use your favorite framework for that
-* Use Postgres 9.6+ or MySQL 5.7+ for your database;
-* Add to README.md your instructions for running the project. Whether you're delivering just source code or an accompanying `Dockerfile`/`docker-compose.yml`, we expect at most the following commands to be needed to run your solution (besides the usual docker related deploy steps):
-    - `rake db:create`
-    - `rake db:migrate`
-    - `rails s -p 3000 -b '0.0.0.0'`
-* The oldest supported Ruby version is 2.5.1;
-* Have fun and we hope you succeed :-)
+* GitHub will post the events on /events
+* You can open an issue's events on the path /issues/#{issue_number}/events
