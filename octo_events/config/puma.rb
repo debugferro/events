@@ -16,7 +16,6 @@ worker_timeout 3600 if ENV.fetch("RAILS_ENV", "development") == "development"
 # Specifies the `port` that Puma will listen on to receive requests; default is 3000.
 #
 port ENV.fetch("PORT") { 3000 }
-
 # Specifies the `environment` that Puma will run in.
 #
 environment ENV.fetch("RAILS_ENV") { "development" }
@@ -38,6 +37,20 @@ pidfile ENV.fetch("PIDFILE") { "tmp/pids/server.pid" }
 # process behavior so workers use less memory.
 #
 # preload_app!
+
+if  Rails.env.development?
+  begin
+    options = {
+      addr: ENV.fetch("PORT")  {  3000  }
+    }
+    Ngrok::Tunnel.start(options)
+    puts "---------------------NGROK-----------------------------"
+    puts "STATUS: #{Ngrok::Tunnel.status}\nPORT: #{Ngrok::Tunnel.port}\nHTTP: #{Ngrok::Tunnel.ngrok_url}\nHTTPS: #{Ngrok::Tunnel.ngrok_url_https}\n"
+    puts "---------------------NGROK-----------------------------"
+  rescue  =>  error
+      puts "Something went wrong! #{error}"
+    end
+end
 
 # Allow puma to be restarted by `rails restart` command.
 plugin :tmp_restart
